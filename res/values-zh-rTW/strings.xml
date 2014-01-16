@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">小費計算機</string>
+    <string name="action_settings">設定</string>
+    <string name="bill_amount">小計</string>
+    <string name="tip_percentage">服務費</string>
+    <string name="tip_amount">服務費小計</string>
+    <string name="number_of_people">總人數</string>
+    <string name="each_person_cost">每人花費</string>
+
+</resources>
