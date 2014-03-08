@@ -6,6 +6,10 @@ import java.text.DecimalFormat;
 import com.google.ads.AdRequest;
 import com.google.ads.AdSize;
 import com.google.ads.AdView;
+import com.purplebrain.adbuddiz.sdk.AdBuddiz;
+import com.purplebrain.adbuddiz.sdk.AdBuddizDelegate;
+import com.purplebrain.adbuddiz.sdk.AdBuddizError;
+import com.purplebrain.adbuddiz.sdk.AdBuddiz.*;
 
 import android.os.Bundle;
 import android.app.Activity;
@@ -16,13 +20,14 @@ import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.View;
+import android.view.Window;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-public class MainActivity extends Activity {
+public class MainActivity extends Activity implements AdBuddizDelegate {
 
     private EditText mEditBA, mEditTP, mEditTA, mEditNoP, mEditEPC;
 
@@ -48,9 +53,17 @@ public class MainActivity extends Activity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        requestWindowFeature(Window.FEATURE_NO_TITLE);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         init();
+        AdBuddiz.cacheAds(this);
+        AdBuddiz.setDelegate(this);
+    }
+
+    public void onBackPressed() {
+        AdBuddiz.showAd(this);
+        super.onBackPressed();
     }
 
     @Override
@@ -63,23 +76,23 @@ public class MainActivity extends Activity {
     private void init() {
         mSharf = getSharedPreferences(SHAREF_FILE_NAME, 0);
 
-        mEditBA = (EditText)findViewById(R.id.edit_bill_amount);
-//        mEditBA.setText(Integer.toString(100));
+        mEditBA = (EditText) findViewById(R.id.edit_bill_amount);
+        // mEditBA.setText(Integer.toString(100));
 
-        mEditTP = (EditText)findViewById(R.id.edit_tip_percentage);
+        mEditTP = (EditText) findViewById(R.id.edit_tip_percentage);
         mEditTP.setText(Float.toString(mSharf.getFloat(SHAREF_KEY_TP, DEFAULT_TP)));
 
-        mEditTA = (EditText)findViewById(R.id.edit_tip_amount);
+        mEditTA = (EditText) findViewById(R.id.edit_tip_amount);
         mEditTA.setText(Float.toString(0));
 
-        mEditNoP = (EditText)findViewById(R.id.edit_number_of_people);
+        mEditNoP = (EditText) findViewById(R.id.edit_number_of_people);
         mEditNoP.setText(Float.toString(mSharf.getFloat(SHAREF_KEY_NoP, DEFAULT_NOP)));
 
-        mEditEPC = (EditText)findViewById(R.id.edit_each_person_cost);
+        mEditEPC = (EditText) findViewById(R.id.edit_each_person_cost);
         mEditEPC.setText(Float.toString(0));
         addTextWatcher();
 
-        mBtnTPup = (Button)findViewById(R.id.btn_tp_up);
+        mBtnTPup = (Button) findViewById(R.id.btn_tp_up);
         mBtnTPup.setOnClickListener(new OnClickListener() {
 
             @Override
@@ -88,7 +101,7 @@ public class MainActivity extends Activity {
                 mEditTP.setText(changeValue(true, mEditTP));
             }
         });
-        mBtnTPdown = (Button)findViewById(R.id.btn_tp_down);
+        mBtnTPdown = (Button) findViewById(R.id.btn_tp_down);
         mBtnTPdown.setOnClickListener(new OnClickListener() {
 
             @Override
@@ -97,7 +110,7 @@ public class MainActivity extends Activity {
                 mEditTP.setText(changeValue(false, mEditTP));
             }
         });
-        mBtnTAup = (Button)findViewById(R.id.btn_ta_up);
+        mBtnTAup = (Button) findViewById(R.id.btn_ta_up);
         mBtnTAup.setOnClickListener(new OnClickListener() {
 
             @Override
@@ -106,7 +119,7 @@ public class MainActivity extends Activity {
                 mEditTA.setText(changeValue(true, mEditTA));
             }
         });
-        mBtnTAdown = (Button)findViewById(R.id.btn_ta_down);
+        mBtnTAdown = (Button) findViewById(R.id.btn_ta_down);
         mBtnTAdown.setOnClickListener(new OnClickListener() {
 
             @Override
@@ -115,7 +128,7 @@ public class MainActivity extends Activity {
                 mEditTA.setText(changeValue(false, mEditTA));
             }
         });
-        mBtnNoPUp = (Button)findViewById(R.id.btn_nop_up);
+        mBtnNoPUp = (Button) findViewById(R.id.btn_nop_up);
         mBtnNoPUp.setOnClickListener(new OnClickListener() {
 
             @Override
@@ -124,7 +137,7 @@ public class MainActivity extends Activity {
                 mEditNoP.setText(changeValue(true, mEditNoP));
             }
         });
-        mBtnNoPdown = (Button)findViewById(R.id.btn_nop_down);
+        mBtnNoPdown = (Button) findViewById(R.id.btn_nop_down);
         mBtnNoPdown.setOnClickListener(new OnClickListener() {
 
             @Override
@@ -138,18 +151,18 @@ public class MainActivity extends Activity {
     }
 
     private void initCalculator() {
-        m0 = (Button)findViewById(R.id.calculat_btn_0);
-        m1 = (Button)findViewById(R.id.calculat_btn_1);
-        m2 = (Button)findViewById(R.id.calculat_btn_2);
-        m3 = (Button)findViewById(R.id.calculat_btn_3);
-        m4 = (Button)findViewById(R.id.calculat_btn_4);
-        m5 = (Button)findViewById(R.id.calculat_btn_5);
-        m6 = (Button)findViewById(R.id.calculat_btn_6);
-        m7 = (Button)findViewById(R.id.calculat_btn_7);
-        m8 = (Button)findViewById(R.id.calculat_btn_8);
-        m9 = (Button)findViewById(R.id.calculat_btn_9);
-        mDot = (Button)findViewById(R.id.calculat_btn_dot);
-        mBack = (Button)findViewById(R.id.calculat_btn_back);
+        m0 = (Button) findViewById(R.id.calculat_btn_0);
+        m1 = (Button) findViewById(R.id.calculat_btn_1);
+        m2 = (Button) findViewById(R.id.calculat_btn_2);
+        m3 = (Button) findViewById(R.id.calculat_btn_3);
+        m4 = (Button) findViewById(R.id.calculat_btn_4);
+        m5 = (Button) findViewById(R.id.calculat_btn_5);
+        m6 = (Button) findViewById(R.id.calculat_btn_6);
+        m7 = (Button) findViewById(R.id.calculat_btn_7);
+        m8 = (Button) findViewById(R.id.calculat_btn_8);
+        m9 = (Button) findViewById(R.id.calculat_btn_9);
+        mDot = (Button) findViewById(R.id.calculat_btn_dot);
+        mBack = (Button) findViewById(R.id.calculat_btn_back);
         m0.setOnClickListener(mCalculatorOnClickListener);
         m1.setOnClickListener(mCalculatorOnClickListener);
         m2.setOnClickListener(mCalculatorOnClickListener);
@@ -167,7 +180,7 @@ public class MainActivity extends Activity {
     private void initAdView() {
         adView = new AdView(this, AdSize.BANNER, "a152d3b8966b65b");
 
-        LinearLayout layout = (LinearLayout)findViewById(R.id.adview);
+        LinearLayout layout = (LinearLayout) findViewById(R.id.adview);
 
         layout.addView(adView);
         new Thread(new Runnable() {
@@ -438,5 +451,21 @@ public class MainActivity extends Activity {
 
     private static final String getDisplayString(float f) {
         return FORMATTER.format(f);
+    }
+
+    @Override
+    public void didClick() {
+    }
+
+    @Override
+    public void didFailToShowAd(AdBuddizError arg0) {
+    }
+
+    @Override
+    public void didHideAd() {
+    }
+
+    @Override
+    public void didShowAd() {
     }
 }
